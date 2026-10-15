@@ -1,0 +1,26 @@
+[package]
+name = "craft-nextcloud"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.90"
+license = "MIT OR Apache-2.0"
+description = "Nextcloud for the craft apps (GridCraft, WordCraft, DeckCraft): open and save Nextcloud files, upload on save with conflict detection, local backups and light locking"
+publish = false
+
+[dependencies]
+quick-xml = "=0.38.4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+ureq = { version = "3.4", default-features = false, features = ["rustls"] }
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+dbg_macro = "warn"
+too_many_arguments = "allow"
+type_complexity = "allow"
+large_enum_variant = "allow"
+
+[profile.release]
+opt-level = 3

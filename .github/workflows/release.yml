@@ -1,0 +1,76 @@
+# Builds the add-in for each platform and attaches one zip per platform to the release of the
+# pushed tag (v1.2.3). The craft apps install it from the repository's address and pick the zip
+# named after their platform (docs/plugins.md, "Publishing a plugin on GitHub").
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "craft-nextcloud $TAG" --generate-notes
+
+  build:
+    needs: release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: macos-15, target: aarch64-apple-darwin, platform: macos-aarch64, exe: craft-nextcloud }
+          - { os: macos-15, target: x86_64-apple-darwin, platform: macos-x86_64, exe: craft-nextcloud }
+          # Static (musl), so it runs on any x86_64 Linux whatever its C library.
+          - { os: ubuntu-latest, target: x86_64-unknown-linux-musl, platform: linux-x86_64, exe: craft-nextcloud }
+          - { os: windows-latest, target: x86_64-pc-windows-msvc, platform: windows-x64, exe: craft-nextcloud.exe }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@e2a55d2ffb04f378e9626c28d38b36d230d1e12f # v1
+        with:
+          toolchain: stable
+          targets: ${{ matrix.target }}
+      - name: musl tools
+        if: contains(matrix.target, 'musl')
+        run: sudo apt-get update -q && sudo apt-get install -yq musl-tools
+      - name: Build
+        run: cargo build --release --locked --target ${{ matrix.target }}
+      - name: Package
+        shell: bash
+        env:
+          TAG: ${{ github.ref_name }}
+          TARGET: ${{ matrix.target }}
+          EXE: ${{ matrix.exe }}
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          dir="craft-nextcloud"
+          mkdir -p "$dir"
+          cp "target/$TARGET/release/$EXE" "$dir/"
+          cp README.md LICENSE-MIT LICENSE-APACHE "$dir/"
+          # The manifest names the program next to it (craft-nextcloud.exe on Windows).
+          "$dir/$EXE" --manifest | jq --arg cmd "./$EXE" '.run.command = $cmd' >"$dir/plugin.json"
+          zip_name="craft-nextcloud-${TAG#v}-$PLATFORM.zip"
+          if [ "$RUNNER_OS" = Windows ]; then
+            7z a -tzip "$zip_name" "$dir" >/dev/null
+          elif [ "$RUNNER_OS" = macOS ]; then
+            codesign --force --sign - "$dir/$EXE"
+            ditto -c -k --keepParent "$dir" "$zip_name"
+          else
+            zip -qr "$zip_name" "$dir"
+          fi
+          echo "ZIP=$zip_name" >>"$GITHUB_ENV"
+      - name: Attach to the release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: gh release upload "$TAG" "$ZIP" --repo "$GITHUB_REPOSITORY" --clobber

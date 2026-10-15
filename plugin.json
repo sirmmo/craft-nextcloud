@@ -1,0 +1,197 @@
+{
+  "apps": [
+    "gridcraft",
+    "wordcraft",
+    "deckcraft"
+  ],
+  "author": "Marco Montanari and the craft-nextcloud contributors",
+  "commands": [
+    {
+      "description": "Open a file from Nextcloud",
+      "id": "open",
+      "label": "Open",
+      "params": "{account?, path?}"
+    },
+    {
+      "description": "A Nextcloud folder (a file id opens it; a folder id ending in / goes into it)",
+      "id": "browse",
+      "label": "Browse",
+      "params": "{account?, path?, id?, nav?}"
+    },
+    {
+      "description": "Upload this document to a Nextcloud folder and keep it in sync",
+      "id": "saveTo",
+      "label": "Save to Nextcloud",
+      "params": "{account?, path?, id?, here?, overwrite?}"
+    },
+    {
+      "description": "Upload pending changes and check Nextcloud for a newer version",
+      "id": "syncNow",
+      "label": "Sync Now",
+      "params": "{}"
+    },
+    {
+      "description": "Open this file in Nextcloud in the browser, where others can edit it with you",
+      "id": "openInBrowser",
+      "label": "Collaborate in Nextcloud",
+      "params": "{}"
+    },
+    {
+      "description": "Create a public link to this file",
+      "id": "share",
+      "label": "Share Link",
+      "params": "{}"
+    },
+    {
+      "description": "This document's local backups",
+      "id": "backups",
+      "label": "Backups",
+      "params": "{}"
+    },
+    {
+      "description": "Sign in to a Nextcloud server",
+      "id": "connect",
+      "label": "Connect",
+      "params": "{fields?: {server}}"
+    },
+    {
+      "description": "Sign out of a Nextcloud account and revoke its app password",
+      "id": "disconnect",
+      "label": "Disconnect",
+      "params": "{id?}"
+    },
+    {
+      "description": "Accounts, this document's link, last upload and lock",
+      "id": "status",
+      "label": "Status",
+      "params": "{}"
+    },
+    {
+      "description": "Backups, retention, locking and upload on save",
+      "id": "settings",
+      "label": "Settings",
+      "params": "{}"
+    },
+    {
+      "description": "Second step of Connect (from its dialog)",
+      "id": "finishLogin",
+      "label": "Finish Signing In",
+      "params": "{server, login, token, endpoint, reopen?}"
+    },
+    {
+      "description": "Pick the account to browse (from the Open and Save dialogs)",
+      "id": "chooseAccount",
+      "label": "Choose Account",
+      "params": "{then, pick?, id?}"
+    },
+    {
+      "description": "Open a copy of a backup (from the Backups dialog)",
+      "id": "restoreBackup",
+      "label": "Open Backup",
+      "params": "{document, id}"
+    },
+    {
+      "description": "Show the backups in the file manager",
+      "id": "openBackupsFolder",
+      "label": "Open Backups Folder",
+      "params": "{document?}"
+    },
+    {
+      "description": "Store the settings (from the Settings dialog)",
+      "id": "saveSettings",
+      "label": "Save Settings",
+      "params": "{fields}"
+    },
+    {
+      "description": "Open a web link in the browser",
+      "id": "openUrl",
+      "label": "Open Link",
+      "params": "{url} or {fields: {link}}"
+    }
+  ],
+  "description": "Open and save Nextcloud files: edited locally, uploaded when you save (with conflict detection), backed up on your computer, locked while you edit. Needs plugin protocol 1.2.",
+  "events": [
+    "documentOpened",
+    "documentSaved",
+    "documentClosed"
+  ],
+  "homepage": "https://github.com/sirmmo/craft-nextcloud",
+  "id": "org.craft.nextcloud",
+  "name": "Nextcloud",
+  "run": {
+    "command": "./craft-nextcloud"
+  },
+  "ui": {
+    "ribbon": [
+      {
+        "buttons": [
+          {
+            "command": "open",
+            "icon": "folder"
+          },
+          {
+            "command": "saveTo",
+            "icon": "save"
+          },
+          {
+            "command": "syncNow",
+            "icon": "refresh",
+            "size": "small"
+          }
+        ],
+        "group": "Files",
+        "tab": "Nextcloud"
+      },
+      {
+        "buttons": [
+          {
+            "command": "openInBrowser",
+            "icon": "link"
+          },
+          {
+            "command": "share",
+            "icon": "share"
+          }
+        ],
+        "group": "Collaborate",
+        "tab": "Nextcloud"
+      },
+      {
+        "buttons": [
+          {
+            "command": "backups",
+            "icon": "clock"
+          }
+        ],
+        "group": "Backups",
+        "tab": "Nextcloud"
+      },
+      {
+        "buttons": [
+          {
+            "command": "connect",
+            "icon": "lock"
+          },
+          {
+            "command": "status",
+            "icon": "info",
+            "size": "small"
+          },
+          {
+            "command": "settings",
+            "icon": "settings",
+            "size": "small"
+          },
+          {
+            "command": "disconnect",
+            "icon": "delete",
+            "size": "small"
+          }
+        ],
+        "group": "Account",
+        "tab": "Nextcloud"
+      }
+    ]
+  },
+  "version": "0.1.0"
+}
